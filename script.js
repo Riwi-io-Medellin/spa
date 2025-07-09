@@ -10,7 +10,8 @@ let counter = 0;
 
 function isAuth() {
   const result = localStorage.getItem("Auth") || null;
-  return result;
+  const resultBool = result === 'true'
+  return resultBool;
 }
 
 async function navigate(pathname) {
