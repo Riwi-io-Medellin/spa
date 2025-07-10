@@ -1,16 +1,16 @@
+import { getUsers } from "./services";
+
+// routes
 const routes = {
-  "/": "./views/users.html",
   "/users": "./views/users.html",
   "/newuser": "./views/newuser.html",
   "/about": "./views/about.html",
   "/login": "./views/login.html",
 };
 
-let counter = 0;
-
 function isAuth() {
   const result = localStorage.getItem("Auth") || null;
-  const resultBool = result === 'true'
+  const resultBool = result === "true";
   return resultBool;
 }
 
@@ -18,12 +18,12 @@ async function navigate(pathname) {
   if (!isAuth()) {
     pathname = "/login";
   }
-
-  const route = routes[pathname] || routes["/"];
+  const route = routes[pathname];
   const html = await fetch(route).then((res) => res.text());
   document.getElementById("content").innerHTML = html;
   history.pushState({}, "", pathname);
 
+  if (pathname === "/users") setupUsers();
   if (pathname === "/about") setupCounter();
   if (pathname === "/login") setupLoginForm();
 }
@@ -36,7 +36,18 @@ document.body.addEventListener("click", (e) => {
   }
 });
 
+function setupUsers() {
+  const userRole = localStorage.getItem("role");
+  const isAdmin = userRole === "admin";
+
+  document.querySelectorAll(".admin-btn").forEach((button) => {
+    button.style.display = isAdmin ? "" : "none";
+  });
+}
+
 function setupCounter() {
+  let counter = 0;
+
   const counterValue = document.getElementById("counter-value");
   const incrementBtn = document.getElementById("increment-btn");
   const decrementBtn = document.getElementById("decrement-btn");
@@ -52,26 +63,27 @@ function setupCounter() {
   });
 }
 
-window.addEventListener("popstate", () => {
-  console.log("se hizo clic");
-  console.log(location);
-  navigate(location.pathname);
-});
 
+// login
 function setupLoginForm() {
-  const userAuth = "admin";
-  const passAuth = "1234";
-
   const form = document.getElementById("login-spa");
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const user = document.getElementById("user").value;
     const pass = document.getElementById("password").value;
 
-    if (user === userAuth && pass === passAuth) {
+    const users = await getUsers();
+
+    // Buscar usuario que coincida
+    const foundUser = users.find(
+      (u) => u.user === user && String(u.password) === pass
+    );
+
+    if (foundUser) {
       localStorage.setItem("Auth", "true");
+      localStorage.setItem("role", foundUser.role);
       navigate("/users");
     } else {
       alert("usuario o contraseña son incorrectos");
@@ -79,13 +91,21 @@ function setupLoginForm() {
   });
 }
 
+// logout
 const buttonCloseSession = document.getElementById("close-sesion");
 buttonCloseSession.addEventListener("click", () => {
   localStorage.setItem("Auth", "false");
+  localStorage.removeItem("role");
   navigate("/login");
 });
 
 
 window.addEventListener("DOMContentLoaded", () => {
+  navigate(location.pathname);
+});
+
+window.addEventListener("popstate", () => {
+  console.log("se hizo clic");
+  console.log(location);
   navigate(location.pathname);
 });

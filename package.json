@@ -21,5 +21,8 @@
   "homepage": "https://github.com/daveshb/spa#readme",
   "devDependencies": {
     "vite": "^7.0.2"
+  },
+  "dependencies": {
+    "json-server": "^1.0.0-beta.3"
   }
 }
