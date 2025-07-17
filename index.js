@@ -1,4 +1,4 @@
-import { getUsers } from "./services";
+import { getUsers } from "./utils/services";
 
 // routes
 const routes = {
@@ -8,13 +8,16 @@ const routes = {
   "/login": "./views/login.html",
 };
 
+// 1
 function isAuth() {
   const result = localStorage.getItem("Auth") || null;
+  // const result = sessionStorage.getItem("Auth") || null;
   const resultBool = result === "true";
   return resultBool;
 }
 
 async function navigate(pathname) {
+ // 2
   if (!isAuth()) {
     pathname = "/login";
   }
@@ -64,7 +67,7 @@ function setupCounter() {
 }
 
 
-// login
+// 3 login
 function setupLoginForm() {
   const form = document.getElementById("login-spa");
 
